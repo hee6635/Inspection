@@ -32,7 +32,7 @@ function renderTabs() {
   $('#tabs').innerHTML = '<div id="thumb"></div>' + S.t.c.map((t, i) => {
     const c = Tree.count(t, 1);
     return `<b class="tab${i == S.cur ? ' on' : ''}" data-id="${t.id}">${esc(t.n)}${c ? `<i class="tb">${c}</i>` : ''}</b>`;
-  }).join('') + '<b class="plus" data-add="root">⊕</b>';
+  }).join('');
   thumb(false);
 }
 function thumb(anim) {
@@ -220,7 +220,7 @@ document.addEventListener('touchmove', e => {
   if (!G.lp) { if (Math.abs(dx) + Math.abs(dy) > 10) { clearTimeout(G.timer); G = null; } return; }
   e.preventDefault(); // without this the WebView eats the next tap after a drag
   if (Math.abs(dx) + Math.abs(dy) > 6) G.moved = true;
-  dragMove(G, G.ax == 'x' ? dx : dy);
+  dragMove(G, dx, dy);
 }, { passive: false });
 document.addEventListener('touchend', e => {
   if (!G) return;
@@ -243,27 +243,40 @@ function lift(g) {
   const el = g.el, kind = el.classList[0];
   g.sib = [...el.parentNode.children].filter(x => x.dataset.id && x.classList[0] == kind);
   g.from = g.to = g.sib.indexOf(el);
-  g.ax = kind == 'tab' ? 'x' : 'y';
+  g.ax = kind == 'tab' ? 'grid' : 'y';
   g.rects = g.sib.map(s => s.getBoundingClientRect());
   const r0 = g.rects[0], r1 = g.rects[1];
-  const gap = r1 ? (g.ax == 'x' ? r1.left - r0.right : r1.top - r0.bottom) : 0;
-  g.sz = g.rects.map(r => (g.ax == 'x' ? r.width : r.height) + gap);
+  const gap = r1 ? r1.top - r0.bottom : 0;
+  g.sz = g.rects.map(r => r.height + gap);
   el.classList.add('lift');
   el.style.transition = 'transform .2s ' + EASE; el.style.transform = 'scale(1.03)';
   g.sib.forEach(s => s != el && s.classList.add('mv'));
 }
-const mid = (r, ax) => ax == 'x' ? r.left + r.width / 2 : r.top + r.height / 2;
-function dragMove(g, d) {
-  const T = g.ax == 'x' ? 'X' : 'Y', r = g.rects[g.from];
+// offset that moves sibling i onto cell j (tabs sit in a grid of equal cells)
+const cell = (g, i, j) => `translate(${g.rects[j].left - g.rects[i].left}px,${g.rects[j].top - g.rects[i].top}px)`;
+function dragMove(g, dx, dy) {
+  g.el.style.transition = 'none';
+  if (g.ax == 'grid') { // drop onto the cell nearest to the finger; cells in between shift one step
+    g.el.style.transform = `translate(${dx}px,${dy}px) scale(1.03)`;
+    const r = g.rects[g.from], x = r.left + r.width / 2 + dx, y = r.top + r.height / 2 + dy;
+    let to = g.from, best = Infinity;
+    g.rects.forEach((q, i) => { const d = Math.hypot(q.left + q.width / 2 - x, q.top + q.height / 2 - y); if (d < best) { best = d; to = i; } });
+    g.sib.forEach((s, i) => {
+      if (i == g.from) return;
+      s.style.transform = g.from < to && i > g.from && i <= to ? cell(g, i, i - 1) : to < g.from && i >= to && i < g.from ? cell(g, i, i + 1) : '';
+    });
+    g.to = to; return;
+  }
+  const r = g.rects[g.from];
   // swap once the dragged edge crosses a neighbour's middle
-  const lo = (g.ax == 'x' ? r.left : r.top) + d, hi = (g.ax == 'x' ? r.right : r.bottom) + d;
-  g.el.style.transition = 'none'; g.el.style.transform = `translate${T}(${d}px) scale(1.03)`;
+  const lo = r.top + dy, hi = r.bottom + dy;
+  g.el.style.transform = `translateY(${dy}px) scale(1.03)`;
   let to = g.from;
   g.sib.forEach((s, i) => {
     if (i == g.from) return;
-    const m = mid(g.rects[i], g.ax); let sh = 0;
+    const m = g.rects[i].top + g.rects[i].height / 2; let sh = 0;
     if (i > g.from && m < hi) { sh = -g.sz[g.from]; to++; } else if (i < g.from && m > lo) { sh = g.sz[g.from]; to--; }
-    s.style.transform = sh ? `translate${T}(${sh}px)` : '';
+    s.style.transform = sh ? `translateY(${sh}px)` : '';
   });
   g.to = to;
   // shortcut: no auto-scroll while dragging near the screen edge; add if lists outgrow one screen
@@ -274,11 +287,11 @@ function unlift(g) {
   setTimeout(() => { g.el.classList.remove('lift'); g.sib.forEach(s => s.classList.remove('mv')); }, 200);
 }
 function drop(g) {
-  const T = g.ax == 'x' ? 'X' : 'Y';
   let off = 0;
   if (g.to > g.from) for (let i = g.from + 1; i <= g.to; i++) off += g.sz[i];
   else for (let i = g.to; i < g.from; i++) off -= g.sz[i];
-  g.el.style.transition = 'transform .22s ' + EASE; g.el.style.transform = `translate${T}(${off}px)`;
+  g.el.style.transition = 'transform .22s ' + EASE;
+  g.el.style.transform = g.ax == 'grid' ? cell(g, g.from, g.to) : `translateY(${off}px)`;
   setTimeout(() => {
     if (g.to != g.from) {
       const f = find(g.el.dataset.id), arr = f.p.c, curTab = S.t.c[S.cur];

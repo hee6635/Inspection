@@ -66,7 +66,12 @@ const shots = process.argv[2];
   await hold('.tab >> nth=1', -80, 0);
   assert.deepStrictEqual(await p.$$eval('.tab', e => e.map(x => x.firstChild.textContent)), ['K2', 'K1'], 'tab reorder');
   assert.strictEqual(await p.textContent('.tab.on'), 'K2', 'selection follows the tab');
-  await tap('.tab >> nth=1'); // back to K1
+  // tabs are a 3-column grid: drag a 2nd-row tab up onto the first cell
+  for (const n of ['K3', 'K4']) { await tap('.plus'); await p.fill('#in', n); await p.click('[data-ok]'); await wait(500); }
+  await hold('.tab >> nth=3', 0, -46);
+  assert.deepStrictEqual(await p.$$eval('.tab', e => e.map(x => x.firstChild.textContent)), ['K4', 'K2', 'K1', 'K3'], 'grid tab reorder');
+  await shot('6-grid');
+  await tap('.tab >> nth=2'); // back to K1
 
   // long-press release on a card -> menu -> rename
   await hold('.card >> nth=3');
