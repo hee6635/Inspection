@@ -28,27 +28,26 @@ h1 { font-size: 24px; margin: 0; }
 
 /* 큰 탭 */
 #tabs {
-  position: relative; display: flex; flex-wrap: wrap; gap: 2px;
-  margin: 0 16px 14px; padding: 3px; background: var(--seg); border-radius: 22px;
+  position: relative; display: flex; flex-wrap: wrap; gap: 6px; margin: 0 16px 14px;
 }
 #thumb {
-  position: absolute; top: 0; left: 0; border-radius: 999px;
-  background: var(--card); border: 1.5px solid var(--blue);
+  position: absolute; z-index: 2; top: 0; left: 0; border-radius: 999px; pointer-events: none;
+  border: 1.5px solid var(--blue); /* outline slides over the pills */
   transition: transform .38s var(--ease), width .38s var(--ease);
 }
 .tab {
-  position: relative; z-index: 1; flex: 1 0 auto; min-width: 60px; text-align: center;
+  position: relative; z-index: 1; flex: 0 0 auto; min-width: 60px; text-align: center;
   font-size: 14px; font-weight: 600; color: var(--sub); padding: 8px 14px;
-  border-radius: 999px; white-space: nowrap; transition: color .3s;
+  border-radius: 999px; white-space: nowrap; background: var(--seg); transition: color .3s, background .3s;
 }
-.tab.on { color: var(--tx); }
+.tab.on { color: var(--tx); background: var(--card); }
 .tab.lift { background: var(--card); }
 .tb {
   display: inline-grid; place-items: center; min-width: 16px; height: 16px; padding: 0 4px;
   margin-left: 4px; border-radius: 999px; background: var(--red); color: #fff;
   font-size: 10px; font-style: normal; vertical-align: 1px;
 }
-.plus { position: relative; z-index: 1; flex: none; width: 36px; display: grid; place-items: center; color: var(--blue); font-size: 18px; }
+.plus { position: relative; z-index: 1; flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--seg); display: grid; place-items: center; color: var(--blue); font-size: 18px; }
 
 /* 소분류 카드 */
 #list { padding: 0 16px 60px; }

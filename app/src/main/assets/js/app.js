@@ -40,7 +40,7 @@ function thumb(anim) {
   if (!on) { th.style.display = 'none'; return; }
   th.style.transition = anim ? '' : 'none';
   th.style.width = on.offsetWidth + 'px'; th.style.height = on.offsetHeight + 'px';
-  th.style.transform = `translate(${on.offsetLeft}px,${on.offsetTop}px)`; // tabs wrap onto several rows
+  th.style.transform = `translate(${on.offsetLeft}px,${on.offsetTop}px)`;
 }
 function renderList() {
   const tab = S.t.c[S.cur];
