@@ -1,0 +1,59 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../app/src/main/assets/app.css"><style>
+body{display:flex;gap:20px;padding:20px;background:#e9ecef;font-family:"Noto Sans CJK KR",sans-serif}
+.ph{width:330px;height:640px;background:var(--bg);border:9px solid #191f28;border-radius:32px;overflow:hidden;position:relative}
+.c{font-weight:700;font-size:15px;margin-bottom:8px;text-align:center}
+.age{margin-left:auto;font-size:11.5px;font-weight:600;color:#e0707d;white-space:nowrap}
+.age.old{color:#fff;background:var(--red);border-radius:999px;padding:1px 7px}
+.snack{position:absolute;left:14px;right:14px;bottom:24px;background:#333d4b;color:#fff;border-radius:16px;padding:14px 16px;font-size:14px;display:flex;align-items:center}
+.snack b{margin-left:auto;color:#6ea8fe}
+.bar2{height:3px;background:#6ea8fe;border-radius:2px;position:absolute;left:16px;bottom:6px;width:60%}
+.srch{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--seg)}
+.srch svg{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:2.2;stroke-linecap:round}
+.sbox{margin:0 16px 12px;background:var(--card);border:1.5px solid var(--blue);border-radius:14px;padding:11px 14px;font-size:16px;display:flex;gap:8px;align-items:center}
+.res{margin:0 16px 8px;background:var(--card);border-radius:16px;padding:12px 14px}
+.res .p{font-size:12px;color:var(--sub);margin-bottom:4px}.res .t{font-size:15px;font-weight:600}
+.res mark{background:#fff1a8;color:inherit;border-radius:3px;padding:0 1px}
+.res .k{font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;margin-right:6px}
+.ki{background:var(--redbg);color:var(--red)}.km{background:#eef4ff;color:var(--blue)}
+.arrow{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-size:13px;color:var(--blue);font-weight:700;text-align:center}
+.gone{opacity:.0} .mode b{white-space:nowrap} .mode{gap:10px;min-width:0} header{gap:4px}
+</style></head><body>
+<div><div class="c">① 해결(삭제) → 되돌리기</div><div class="ph">
+<header><div class="mode"><b class="on">설비점검</b><b>메모</b></div></header>
+<nav id="tabs"><b class="tab" style="background:var(--card);outline:1.5px solid var(--blue);color:var(--tx)">K1<i class="tb">1</i></b><b class="tab">K1야간</b><b class="tab">K2</b></nav>
+<main id="list"><div class="card hot open"><div class="row"><div class="ico"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L4 16.8V20h3.2l5.3-5.3a4 4 0 0 0 5.2-5.4l-2.5 2.5-2.3-.6-.6-2.3z"/></svg></div><div class="nm">정정 유압</div><div class="badge">1</div><div class="chev">⌄</div></div>
+<div class="body"><div><div class="chk">정정 유압 Pump 작동 상태 점검</div><div class="iss">#3PUMP 미세누유중</div><div class="add"><i>+</i>문제 추가</div><div class="gap"></div></div></div></div></main>
+<div class="snack">해결했어요 · 이음새 파손<b>되돌리기</b><div class="bar2"></div></div>
+</div></div>
+
+<div><div class="c">② 문제 옆에 등록 날짜</div><div class="ph">
+<header><div class="mode"><b class="on">설비점검</b><b>메모</b></div></header>
+<main id="list" style="margin-top:4px"><div class="card hot open"><div class="row"><div class="ico"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L4 16.8V20h3.2l5.3-5.3a4 4 0 0 0 5.2-5.4l-2.5 2.5-2.3-.6-.6-2.3z"/></svg></div><div class="nm">정정 유압</div><div class="badge">3</div><div class="chev">⌄</div></div>
+<div class="body"><div><div class="chk">정정 유압 Pump 작동 상태 점검</div>
+<div class="iss">#3PUMP 미세누유중<span class="age old">12일째</span></div>
+<div class="iss">#2PUMP 미세누유중<span class="age">3일째</span></div>
+<div class="iss">이음새 파손<span class="age">오늘</span></div>
+<div class="add"><i>+</i>문제 추가</div><div class="gap"></div></div></div></div></main>
+<div style="margin:6px 20px;font-size:12.5px;color:var(--sub);line-height:1.6">· 7일 넘으면 빨간 칸으로 강조<br>· 복사할 땐 날짜 빼고 문제만</div>
+</div></div>
+
+<div><div class="c">③ 끌다가 아래 끝 → 화면 따라감</div><div class="ph">
+<header><div class="mode"><b class="on">설비점검</b><b>메모</b></div></header>
+<main id="list">
+<div class="card"><div class="row"><div class="ico"></div><div class="nm">Grinder 유압</div></div></div>
+<div class="card"><div class="row"><div class="ico"></div><div class="nm">Grease System</div></div></div>
+<div class="card"><div class="row"><div class="ico"></div><div class="nm">유압실 Hoist</div></div></div>
+<div class="card"><div class="row"><div class="ico"></div><div class="nm">#1,2,3 G/M 집진기</div></div></div>
+<div class="card lift" style="transform:translateY(30px) scale(1.03)"><div class="row"><div class="ico"></div><div class="nm">정정 유압</div></div></div>
+</main>
+<div class="arrow">▼<br>손가락이 아래 끝에 오면<br>화면이 천천히 내려감</div>
+</div></div>
+
+<div><div class="c">④ 🔍 검색 (설비점검 + 메모)</div><div class="ph">
+<header><div class="mode"><b class="on">설비점검</b><b>메모</b></div><span class="srch"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20 20"/></svg></span><b class="plus">⊕</b><button id="more">⋯</button></header>
+<div class="sbox">STS<span style="margin-left:auto;color:var(--mute)">✕</span></div>
+<div class="res"><div class="p"><span class="k km">메모</span>K1 › 작업방법</div><div class="t"><mark>STS</mark> 강종은 Grease 확인 후 작업 시작</div></div>
+<div class="res"><div class="p"><span class="k ki">문제</span>K2 › Roller Table › 롤 상태 점검</div><div class="t"><mark>STS</mark> 이송 중 소음</div></div>
+<div style="margin:10px 20px;font-size:12.5px;color:var(--sub);line-height:1.6">· 결과 누르면 그 탭으로 가서 펼쳐 줌</div>
+</div></div>
+</body></html>
