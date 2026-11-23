@@ -188,6 +188,13 @@ class RingView(c: Context, private val radius: Float, stroke: Float) : View(c) {
     private val path = Path()
     private val seg = Path()
 
+    // Take no space while the bubble sizes itself; the FrameLayout then stretches us to the bubble's size.
+    // (Default View measuring grabbed the whole screen inside the WRAP_CONTENT overlay window.)
+    override fun onMeasure(w: Int, h: Int) {
+        fun size(spec: Int) = if (MeasureSpec.getMode(spec) == MeasureSpec.EXACTLY) MeasureSpec.getSize(spec) else 0
+        setMeasuredDimension(size(w), size(h))
+    }
+
     override fun onDraw(canvas: Canvas) {
         if (progress <= 0f) return
         val s = paint.strokeWidth / 2
