@@ -129,11 +129,12 @@ function toggle(id) {
 }
 let askedFloat = false;
 function copy(el) {
-  const f = find(el.dataset.id), item = f.p, cat = find(item.id).p;
-  el.animate([{ transform: 'scale(.96)' }, { transform: 'none' }], { duration: 220, easing: EASE });
+  // tapping any 문제 copies all 문제 of that 점검항목, one per line
+  const item = find(el.dataset.id).p, cat = find(item.id).p, text = item.c.map(n => n.n).join('\n');
+  el.parentNode.querySelectorAll('.iss').forEach(e => e.animate([{ transform: 'scale(.96)' }, { transform: 'none' }], { duration: 220, easing: EASE }));
   const fl = S.float !== false; // 말풍선 on by default
-  A.copy(f.n.n, cat.n, item.n, fl);
-  toast('복사됨 · <b>' + esc(f.n.n) + '</b>');
+  A.copy(text, cat.n, item.n, fl);
+  toast('복사됨 · <b>' + (item.c.length > 1 ? `문제 ${item.c.length}개` : esc(text)) + '</b>');
   if (fl && !askedFloat && !A.canFloat()) {
     askedFloat = true;
     setTimeout(() => confirmBox('말풍선을 다른 앱 위에 띄우려면<br><b>다른 앱 위에 표시</b>를 허용해 주세요', '허용하기', el)

@@ -52,8 +52,10 @@ const shots = process.argv[2];
   await hold('.iss >> nth=1', 0, -40);
   assert.deepStrictEqual(await p.$$eval('.iss', e => e.map(x => x.textContent)), ['#1PUMP 미세누유중', '#3PUMP 미세누유중'], 'issue reorder');
   // each issue copies only itself
+  // any 문제 copies every 문제 of its 점검항목, one per line
   await tap('.iss >> nth=1');
-  assert.strictEqual(await p.evaluate(() => window.__copied.at(-1)[0]), '#3PUMP 미세누유중');
+  assert.strictEqual(await p.evaluate(() => window.__copied.at(-1)[0]), '#1PUMP 미세누유중\n#3PUMP 미세누유중');
+  assert.ok((await p.textContent('#toast')).includes('문제 2개'), 'toast shows count');
 
   // drag the Grease System card above Grinder 유압
   await hold('.card >> nth=2', 0, -70);
