@@ -1,0 +1,129 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+:root{--bg:#f2f4f6;--card:#fff;--tx:#191f28;--sub:#8b95a1;--line:#eef0f3;--blue:#3182f6;--red:#f04452;--redbg:#fff0f1;--ease:cubic-bezier(.2,.9,.25,1)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{zoom:2}body{margin:0;width:360px;height:760px;overflow:hidden;font-family:"Noto Sans CJK KR","Noto Sans KR",sans-serif;color:var(--tx);background:#000}
+.scr{position:absolute;inset:0;background:var(--bg);transition:transform .4s var(--ease)}
+#app{padding:0 16px}
+h1{font-size:24px;margin:28px 4px 16px;display:flex;justify-content:space-between;align-items:center}
+.more{font-size:22px;color:var(--sub)}
+.seg{position:relative;display:flex;border:1.5px solid #e5e8eb;border-radius:999px;padding:3px;margin-bottom:16px;background:#e9ecef}
+.seg b{flex:1;text-align:center;font-size:14px;padding:8px 0;position:relative;z-index:1;color:var(--sub);font-weight:600;transition:color .3s}
+.seg b.on{color:var(--tx)}
+.thumb{position:absolute;top:3px;bottom:3px;left:3px;border-radius:999px;background:#fff;border:1.5px solid var(--blue);transition:transform .38s var(--ease),width .38s var(--ease)}
+.plus{width:36px;flex:none!important;color:var(--blue)!important;font-size:18px!important;padding:5px 0!important}
+.card{background:var(--card);border-radius:20px;margin-bottom:10px;overflow:hidden}
+.row{display:flex;align-items:center;padding:14px 16px;gap:12px}
+.ico{width:36px;height:36px;border-radius:12px;background:#f2f4f6;display:grid;place-items:center;flex:none}
+.ico svg{width:20px;height:20px;stroke:#6b7684;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hot .ico{background:var(--redbg)}.hot .ico svg{stroke:var(--red)}
+.nm{flex:1;font-size:16px;font-weight:600}
+.badge{background:var(--red);color:#fff;font-size:12px;font-weight:700;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;padding:0 7px;transition:transform .3s var(--ease)}
+.chev{color:#b0b8c1;font-size:18px;transition:transform .35s var(--ease)}
+.open .chev{transform:rotate(180deg)}
+.body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .34s var(--ease)}
+.open .body{grid-template-rows:1fr}
+.body>div{overflow:hidden}
+.chk{padding:10px 16px 4px 64px;font-size:14px;color:#4e5968;font-weight:600}
+.iss{margin:4px 16px 4px 64px;padding:10px 12px;border-radius:12px;background:var(--redbg);color:var(--red);font-size:15px;font-weight:700;display:flex;gap:8px;align-items:center;transition:transform .15s,background .3s}
+.iss:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--red);flex:none}
+.iss.press{transform:scale(.96);background:#ffe0e3}
+.add{margin:2px 16px 2px 64px;padding:8px 0;font-size:14px;color:var(--blue);display:flex;align-items:center;gap:6px}
+.add i{width:18px;height:18px;border:1.5px solid var(--blue);border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:13px;line-height:1}
+.gap{height:10px}
+.pop{animation:pop .4s var(--ease)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.inp{margin:4px 16px 4px 64px;position:relative;background:#f2f4f6;border-radius:12px;border:1.5px solid var(--blue);padding:18px 44px 8px 14px;font-size:15px;min-height:46px}
+.inp label{position:absolute;left:14px;top:4px;font-size:11px;color:var(--blue)}
+.inp .ok{position:absolute;right:8px;top:9px;width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:15px;transition:transform .2s}
+.caret{display:inline-block;width:1.5px;height:16px;background:var(--blue);vertical-align:-3px;animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+#toast{position:absolute;left:16px;right:16px;top:14px;background:#333d4b;color:#fff;border-radius:16px;padding:13px 16px;font-size:14px;transform-origin:top;transform:perspective(400px) rotateX(-90deg);opacity:0;transition:transform .4s var(--ease),opacity .3s;z-index:5}
+#toast.on{transform:none;opacity:1}
+#toast b{color:#ff8f9c}
+/* company app */
+#co{background:#fff;transform:translateX(100%)}
+.cobar{background:#455a64;color:#fff;padding:18px 16px;font-size:16px}
+.form{padding:18px 16px;font-size:13px;color:#555}
+.field{border:1px solid #bbb;border-radius:4px;height:42px;margin:6px 0 16px;padding:10px;font-size:15px;color:#222}
+.pastechip{position:absolute;background:#333;color:#fff;font-size:13px;padding:7px 12px;border-radius:8px;opacity:0;transform:scale(.8);transition:.2s}
+.pastechip.on{opacity:1;transform:none}
+#bub{position:absolute;right:10px;top:70px;background:rgba(25,31,40,.74);backdrop-filter:blur(6px);color:#fff;border-radius:14px;padding:8px 12px;max-width:210px;line-height:1.4;box-shadow:0 4px 14px rgba(0,0,0,.25);transform:scale(0);opacity:0;transform-origin:top right;transition:transform .4s var(--ease),opacity .3s}
+#bub.on{transform:none;opacity:1}
+#bub .s{font-size:10.5px;color:#c9d1d9}#bub .m{font-size:13.5px;font-weight:700;color:#ff8f9c}
+#bub.pulse{animation:pulse .35s var(--ease)}
+@keyframes pulse{50%{transform:scale(1.07)}}
+#bub.bye{transform:scale(.2);opacity:0;transition:transform .3s cubic-bezier(.5,0,.8,.3),opacity .3s}
+.ring{position:absolute;inset:-4px;border-radius:17px;border:2px solid #ff8f9c;opacity:0;clip-path:inset(0 100% 0 0)}
+.ring.go{opacity:1;clip-path:inset(0 0 0 0);transition:clip-path .7s linear}
+.mini{position:absolute;font-size:12px;background:#333d4b;color:#fff;padding:5px 10px;border-radius:10px;opacity:0;transition:.25s}
+/* finger */
+#f{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:rgba(49,130,246,.25);border:2px solid rgba(49,130,246,.7);z-index:9;transition:transform .45s var(--ease),opacity .2s;opacity:0;left:0;top:0}
+#f.dn{background:rgba(49,130,246,.5)}
+#cap{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;font-size:13px;padding:7px 14px;border-radius:999px;white-space:nowrap;z-index:10;transition:opacity .3s}
+
+.lift{z-index:4;position:relative;box-shadow:0 10px 24px rgba(0,0,0,.18)!important}
+.mv{transition:transform .25s var(--ease)}
+.seg b.lift{background:#fff;border-radius:999px;color:var(--tx)}
+#menu{position:absolute;right:20px;width:170px;background:#fff;border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.2);overflow:hidden;transform-origin:top right;transform:scale(.3);opacity:0;transition:transform .3s var(--ease),opacity .2s;z-index:6}
+#menu.on{transform:none;opacity:1}
+#menu div{padding:14px 16px;font-size:15px;border-bottom:1px solid var(--line)}
+.gone{transition:max-height .32s var(--ease),margin .32s var(--ease),opacity .25s,transform .32s var(--ease)!important;max-height:0!important;margin-bottom:0!important;opacity:0;transform:scale(.9)}
+.addcat{display:flex;align-items:center;gap:8px;justify-content:center;color:var(--blue);font-size:15px;padding:12px;border:1.5px dashed #c9d6ea;border-radius:20px}
+.addcat i{width:20px;height:20px;border:1.5px solid var(--blue);border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:14px}
+</style></head><body><div class="scr" id="app">
+ <div id="toast"></div>
+ <h1>설비점검 <span class="more">⋯</span></h1>
+ <div class="seg" id="seg"><div class="thumb" id="thumb"></div><b class="on">K1</b><b>K2</b><b>지게차</b><b>크레인</b><b class="plus">⊕</b></div>
+ <div id="list"></div>
+ <div class="addcat"><i>+</i>소분류 추가</div>
+ <div id="menu"><div>이름 수정</div><div style="color:var(--red)">삭제</div></div>
+</div>
+<div id="f"></div><div id="cap"></div><script>const I={pipe:'<path d="M4 12h6l2-3 2 6 2-3h4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>',drop:'<path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/>',hoist:'<path d="M4 5h16M12 5v8M9 13h6l-1 6h-4z"/>',fan:'<circle cx="12" cy="12" r="8"/><path d="M12 12l4-4M12 12l-4 4M12 12l4 4"/>'};
+const data=[['정정 유압','drop',[['정정 유압 Pump 작동 상태 점검',['#3PUMP 미세누유중','#1PUMP 미세누유중']]]],['Grinder 유압','gear',[]],['Grease System','pipe',[]],['유압실 Hoist','hoist',[]],['#1,2,3 G/M 집진기, S/B 집진기','fan',[]]];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+$('#list').innerHTML=data.map(([n,ic,ch])=>{const c=ch.reduce((a,x)=>a+x[1].length,0);return `<div class="card ${c?'hot open':''}" style="max-height:400px"><div class="row"><div class="ico"><svg viewBox="0 0 24 24">${I[ic]}</svg></div><div class="nm">${n}</div>${c?`<div class="badge">${c}</div>`:''}<div class="chev">⌄</div></div><div class="body"><div>${ch.map(([cn,is])=>`<div class="chk">${cn}</div><div class="isl">${is.map(t=>`<div class="iss">${t}</div>`).join('')}</div><div class="add"><i>+</i>문제 추가</div>`).join('')}${ch.length?'<div class="add" style="color:#6b7684"><i style="border-color:#6b7684">+</i>점검항목 추가</div>':''}<div class="gap"></div></div></div></div>`}).join('');
+const sl=ms=>new Promise(r=>setTimeout(r,ms));
+const F=$('#f');
+function R(el){const r=el.getBoundingClientRect(),z=document.documentElement.getBoundingClientRect().width/360;return{left:r.left/z,top:r.top/z,width:r.width/z,height:r.height/z}}
+function ctr(el){const r=R(el);return[r.left+r.width/2,r.top+r.height/2]}
+async function mv(x,y,t=480){F.style.transition=`transform ${t}ms var(--ease),opacity .2s`;F.style.opacity=1;F.style.transform=`translate(${x}px,${y}px)`;await sl(t)}
+async function tap(el,hold=120){const[x,y]=ctr(el);await mv(x,y);F.classList.add('dn');await sl(hold);F.classList.remove('dn')}
+const cap=t=>$('#cap').textContent=t;
+async function toast(t){const e=$('#toast');e.innerHTML='복사됨 · <b>'+t+'</b>';e.classList.add('on');await sl(1100);e.classList.remove('on');await sl(350)}
+function thumb(i){const b=$$('.seg b')[i];$('#thumb').style.width=b.offsetWidth+'px';$('#thumb').style.transform=`translateX(${b.offsetLeft-3}px)`}
+thumb(0);
+// long-press drag reorder; items have uniform size along the axis
+async function drag(items,from,to,ax){
+ const el=items[from],a=ax=='x'?'X':'Y';
+ const r0=R(items[0]),r1=R(items[1]);const step=ax=='x'?r1.left-r0.left:r1.top-r0.top;
+ let[x,y]=ctr(el);await mv(x,y);F.classList.add('dn');await sl(450);
+ el.classList.add('lift');el.style.transition='transform .2s var(--ease)';el.style.transform='scale(1.05)';await sl(250);
+ items.forEach(o=>{if(o!=el)o.classList.add('mv')});
+ const total=(to-from)*step,N=30;
+ for(let k=1;k<=N;k++){const d=total*k/N;el.style.transition='none';el.style.transform=`translate${a}(${d}px) scale(1.05)`;
+  F.style.transition='none';F.style.transform=ax=='x'?`translate(${x+d}px,${y}px)`:`translate(${x}px,${y+d}px)`;
+  const cur=from+Math.round(d/step);
+  items.forEach((o,i)=>{if(o==el)return;let s=0;if(i>from&&i<=cur)s=-step;if(i<from&&i>=cur)s=step;o.style.transform=s?`translate${a}(${s}px)`:''});
+  await sl(28)}
+ await sl(150);el.style.transition='transform .25s var(--ease)';el.style.transform=`translate${a}(${total}px)`;F.classList.remove('dn');await sl(300);
+ const p=el.parentNode;const ref=to>from?items[to].nextSibling:items[to];
+ items.forEach(o=>{o.style.transition='none';o.style.transform='';o.classList.remove('mv')});el.classList.remove('lift');p.insertBefore(el,ref);
+ void el.offsetWidth;items.forEach(o=>o.style.transition='');F.style.opacity=0;await sl(500)}
+async function run(){
+ await sl(500);cap('큰 탭: 길게 누르고 끌면 순서 이동');
+ await drag($$('.seg b').slice(0,4),1,2,'x');await sl(300);
+ cap('문제 줄: #1을 #3 위로');
+ await drag($$('.isl .iss'),1,0,'y');
+ cap('누른 한 줄만 복사');
+ for(const e of $$('.isl .iss')){await tap(e,150);e.classList.add('press');await sl(120);e.classList.remove('press');await toast(e.textContent)}
+ F.style.opacity=0;await sl(300);
+ cap('소분류 카드도 같은 방식 (Grease ↑)');
+ await drag($$('.card').slice(1,4),1,0,'y');
+ cap('길게 눌렀다 그냥 떼면 → 수정 / 삭제');
+ const h=$$('.card')[3];const[x,y]=ctr(h);await mv(x,y);F.classList.add('dn');await sl(550);F.classList.remove('dn');
+ const m=$('#menu');const hr=R(h);m.style.top=(hr.top+hr.height-6)+'px';m.classList.add('on');await sl(900);
+ await tap(m.children[1]);m.classList.remove('on');await sl(150);F.style.opacity=0;
+ h.style.maxHeight=R(h).height+'px';void h.offsetWidth;h.classList.add('gone');await sl(900);
+ cap('소분류 · 점검항목 · 문제 모두 ⊕로 추가');await tap($('.addcat'));F.style.opacity=0;await sl(1200);
+ window.done=1}
+</script></body></html>
