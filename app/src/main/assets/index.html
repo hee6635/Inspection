@@ -10,10 +10,12 @@
 </script>
 </head>
 <body>
-<header><h1>설비점검</h1><b class="plus" data-add="root" aria-label="큰 탭 추가">⊕</b><button id="more" aria-label="메뉴">⋯</button></header>
+<header><div class="mode"><b data-mode="i" class="on">설비점검</b><b data-mode="m">메모</b></div><b class="srch" data-search aria-label="검색"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20 20"/></svg></b><b class="plus" data-add="root" aria-label="큰 탭 추가">⊕</b><button id="more" aria-label="메뉴">⋯</button></header>
 <nav id="tabs"></nav>
 <main id="list"></main>
 <div id="toast"></div>
+<div id="snack"></div>
+<section id="search"><div class="sbox"><input id="q" placeholder="설비점검 · 메모 검색" autocomplete="off"><b id="sclose">✕</b></div><div id="res"></div></section>
 <div id="dim"></div>
 <div id="pop"></div>
 <script src="js/tree.js"></script>

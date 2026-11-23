@@ -9,15 +9,31 @@ const A = window.Android || {
 };
 const EASE = 'cubic-bezier(.2,.9,.25,1)';
 const LABEL = ['큰 탭', '소분류', '점검항목', '문제 내용'];
+const MLABEL = ['큰 탭', '묶음', '메모'];
+const MICON = '<svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z M9 10h6 M9 14h6 M9 18h4"/></svg>';
+const DEFM = 'K1\n  작업방법';
 const ICON = '<svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L4 16.8V20h3.2l5.3-5.3a4 4 0 0 0 5.2-5.4l-2.5 2.5-2.3-.6-.6-2.3z"/></svg>';
 const DEF = 'K1\n  정정 유압\n    정정 유압 Pump 작동 상태 점검\n      #3PUMP 미세누유중\n  Grinder 유압\n  Grease System\n  유압실 Hoist\n  #1,2,3 G/M 집진기, S/B 집진기';
 
 let S = null;
 try { S = JSON.parse(A.load()); } catch (e) { S = null; }
 if (!S || !S.t || !Array.isArray(S.t.c)) S = { t: Tree.parse(DEF), cur: 0 };
+// S.t / S.cur = the tree on screen; S.x = the other one. 설비점검 ↔ 메모 swaps them.
+if (!S.x || !S.x.t || !Array.isArray(S.x.t.c)) S.x = { t: Tree.parse(DEFM), cur: 0 };
 let seq = 0;
 function ids(n) { n.id = ++seq; n.c = Array.isArray(n.c) ? n.c : []; n.n = String(n.n || ''); n.c.forEach(ids); }
-ids(S.t);
+ids(S.t); ids(S.x.t);
+const memo = () => S.mode == 'm';
+// 문제 (depth 4 of 설비점검) remember when they were added in n.a; older data starts "today"
+function stamp(t) { const now = Date.now(); t.c.forEach(a => a.c.forEach(b => b.c.forEach(c => c.c.forEach(n => { if (!n.a) n.a = now; })))); }
+const day = ms => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
+function age(a) {
+  const d = Math.round((day(Date.now()) - day(a)) / 864e5);
+  return `<span class="age${d >= 7 ? ' old' : ''}">${d <= 0 ? '오늘' : d + '일째'}</span>`;
+}
+const lbl = () => memo() ? MLABEL : LABEL;
+const both = () => memo() ? { i: S.x, m: { t: S.t, cur: S.cur } } : { i: { t: S.t, cur: S.cur }, m: S.x };
+stamp(both().i.t);
 const save = () => A.save(JSON.stringify(S, (k, v) => k === 'id' ? undefined : v));
 function find(id, n = S.t, p = null, d = 0) {
   if (n.id == id) return { n, p, d };
@@ -30,7 +46,7 @@ const pop = el => el && el.animate([{ transform: 'scale(.6)', opacity: 0 }, { tr
 /* ---------- 그리기 ---------- */
 function renderTabs() {
   $('#tabs').innerHTML = '<div id="thumb"></div>' + S.t.c.map((t, i) => {
-    const c = Tree.count(t, 1);
+    const c = memo() ? 0 : Tree.count(t, 1);
     return `<b class="tab${i == S.cur ? ' on' : ''}" data-id="${t.id}">${esc(t.n)}${c ? `<i class="tb">${c}</i>` : ''}</b>`;
   }).join('');
   thumb(false);
@@ -45,15 +61,29 @@ function thumb(anim) {
 function renderList() {
   const tab = S.t.c[S.cur];
   if (!tab) { $('#list').innerHTML = '<div class="empty">⊕ 를 눌러 큰 탭을 추가하세요</div>'; return; }
+  if (memo()) {
+    const all = tab.c.length && tab.c.every(c => c.o);
+    $('#list').innerHTML = (tab.c.length ? `<div class="bulk"><b data-bulk>${all ? '모두 접기' : '모두 펼치기'}</b></div>` : '')
+      + tab.c.map(cat => `<div class="card m${cat.o ? ' open' : ''}" data-id="${cat.id}">
+      <div class="row" data-tog="${cat.id}"><div class="ico">${MICON}</div><div class="nm">${esc(cat.n)}</div><div class="chev">⌄</div></div>
+      <div class="body"><div><div class="notes">${cat.c.map(n => `<div class="note" data-id="${n.id}">${esc(n.n)}</div>`).join('')}</div>
+      <div class="add" data-add="${cat.id}"><i>+</i>메모 추가</div><div class="gap"></div></div></div></div>`).join('')
+      + `<div class="addcat" data-add="${tab.id}"><i>+</i>묶음 추가</div>`;
+    return;
+  }
   $('#list').innerHTML = tab.c.map(cat => {
     const c = Tree.count(cat, 2);
     return `<div class="card${c ? ' hot' : ''}${cat.o ? ' open' : ''}" data-id="${cat.id}">
       <div class="row" data-tog="${cat.id}"><div class="ico">${ICON}</div><div class="nm">${esc(cat.n)}</div>${c ? `<div class="badge">${c}</div>` : ''}<div class="chev">⌄</div></div>
-      <div class="body"><div><div class="items">${cat.c.map(it => `<div class="item" data-id="${it.id}"><div class="chk">${esc(it.n)}</div><div class="issl">${it.c.map(is => `<div class="iss" data-id="${is.id}">${esc(is.n)}</div>`).join('')}</div><div class="add" data-add="${it.id}"><i>+</i>문제 추가</div></div>`).join('')}</div>
+      <div class="body"><div><div class="items">${cat.c.map(it => `<div class="item" data-id="${it.id}"><div class="chk">${esc(it.n)}</div><div class="issl">${it.c.map(is => `<div class="iss" data-id="${is.id}">${esc(is.n)}${age(is.a)}</div>`).join('')}</div><div class="add" data-add="${it.id}"><i>+</i>문제 추가</div></div>`).join('')}</div>
       <div class="add sub" data-add="${cat.id}"><i>+</i>점검항목 추가</div><div class="gap"></div></div></div></div>`;
   }).join('') + `<div class="addcat" data-add="${tab.id}"><i>+</i>소분류 추가</div>`;
 }
-function render() { if (S.cur >= S.t.c.length) S.cur = Math.max(0, S.t.c.length - 1); renderTabs(); renderList(); }
+function render() {
+  if (S.cur >= S.t.c.length) S.cur = Math.max(0, S.t.c.length - 1);
+  $$('[data-mode]').forEach(e => e.classList.toggle('on', (e.dataset.mode == 'm') == memo()));
+  renderTabs(); renderList();
+}
 
 /* ---------- 알림 · 창 ---------- */
 let toastT;
@@ -114,6 +144,16 @@ function confirmBox(msg, ok, from, danger) {
   });
 }
 
+let snackT;
+// bottom bar with an undo button; disappears after 4 s
+function snack(h, undo) {
+  const s = $('#snack');
+  s.innerHTML = `<span>${h}</span><b>되돌리기</b><i></i>`; s.classList.remove('on'); void s.offsetWidth; s.classList.add('on');
+  s.querySelector('b').onclick = () => { hideSnack(); undo(); };
+  clearTimeout(snackT); snackT = setTimeout(hideSnack, 4000);
+}
+function hideSnack() { clearTimeout(snackT); $('#snack').classList.remove('on'); }
+
 /* ---------- 동작 ---------- */
 function selTab(el) {
   const i = $$('.tab').indexOf(el); if (i < 0 || i == S.cur) return;
@@ -123,9 +163,60 @@ function selTab(el) {
   thumb(true); renderList();
   $('#list').animate([{ transform: `translateX(${dir * 40}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 320, easing: EASE });
 }
+function setMode(m) {
+  if ((m == 'm') == memo()) return;
+  const cur = { t: S.t, cur: S.cur };
+  S.t = S.x.t; S.cur = S.x.cur; S.x = cur; S.mode = m == 'm' ? 'm' : undefined; hideSnack();
+  save(); render();
+  const dir = memo() ? 1 : -1;
+  ['#tabs', '#list'].forEach(s => $(s).animate([{ transform: `translateX(${dir * 40}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 320, easing: EASE }));
+}
+function copyNote(el) {
+  el.animate([{ transform: 'scale(.97)' }, { transform: 'none' }], { duration: 220, easing: EASE });
+  A.copy(find(el.dataset.id).n.n, '', '', false); // 메모: copy only, no bubble
+  toast('복사됨');
+}
+function bulk(el) {
+  const cats = S.t.c[S.cur].c, open = !cats.every(c => c.o);
+  cats.forEach(c => { c.o = open; });
+  save();
+  $$('.card').forEach(e => e.classList.toggle('open', open));
+  el.textContent = open ? '모두 접기' : '모두 펼치기';
+}
+function openSearch() {
+  const s = $('#search'); s.classList.add('on');
+  const q = $('#q'); q.value = ''; results(''); q.focus();
+}
+function closeSearch() { const s = $('#search'); if (!s.classList.contains('on')) return false; $('#q').blur(); s.classList.remove('on'); return true; }
+function results(q) {
+  q = q.trim().toLowerCase();
+  const out = [], b = both();
+  if (q) for (const [kind, root] of [['i', b.i.t], ['m', b.m.t]]) {
+    (function w(n, path, d) {
+      n.c.forEach(c => {
+        if (c.n.toLowerCase().includes(q) && out.length < 60) out.push({ kind, c, path, d: d + 1, tab: path.length ? root.c.indexOf(path[0]) : root.c.indexOf(c) });
+        w(c, path.concat(c), d + 1);
+      });
+    })(root, [], 0);
+  }
+  const hi = t => { const i = t.toLowerCase().indexOf(q); return esc(t.slice(0, i)) + '<mark>' + esc(t.slice(i, i + q.length)) + '</mark>' + esc(t.slice(i + q.length)); };
+  $('#res').innerHTML = !q ? '' : out.length ? out.map((r, i) => `<div class="res" data-go="${i}"><div class="p"><span class="k ${r.kind == 'm' ? 'km">메모' : r.d == 4 ? 'ki">문제' : 'kn">설비'}</span>${r.path.map(p => esc(p.n)).join(' › ')}</div><div class="t">${hi(r.c.n)}</div></div>`).join('')
+    : '<div class="empty">찾는 내용이 없어요</div>';
+  $('#res').__r = out;
+}
+function go(i) {
+  const r = $('#res').__r[i]; if (!r) return;
+  closeSearch(); setMode(r.kind);
+  S.cur = Math.max(0, r.tab);
+  if (r.path[1]) r.path[1].o = true; else if (r.d == 2) r.c.o = true; // open the card that holds it
+  save(); render();
+  const el = $(`[data-id="${r.c.id}"]`);
+  if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.animate([{ boxShadow: '0 0 0 3px var(--blue)' }, { boxShadow: '0 0 0 0 transparent' }], { duration: 1400, easing: 'ease-out' }); }
+}
 function toggle(id) {
   const f = find(id); f.n.o = !f.n.o; save();
   $(`.card[data-id="${id}"]`).classList.toggle('open', f.n.o);
+  const b = $('[data-bulk]'); if (b) b.textContent = S.t.c[S.cur].c.every(c => c.o) ? '모두 접기' : '모두 펼치기';
 }
 let askedFloat = false;
 function copy(el) {
@@ -143,9 +234,10 @@ function copy(el) {
 }
 async function add(pid, el) {
   const f = pid == 'root' ? { n: S.t, d: 0 } : find(pid);
-  const L = LABEL[f.d];
+  const L = lbl()[f.d];
   const v = await ask(L + ' 추가', L, '', el); if (!v) return;
   const n = { n: v, c: [], id: ++seq };
+  if (!memo() && f.d == 3) n.a = Date.now();
   f.n.c.push(n);
   if (f.d == 0) S.cur = S.t.c.length - 1;
   save(); render();
@@ -159,7 +251,7 @@ function menu(el) {
     const m = e.target.closest('[data-m]'); if (!m) return;
     closePop();
     if (m.dataset.m == 'e') {
-      const v = await ask('이름 수정', LABEL[f.d - 1], f.n.n, el);
+      const v = await ask('이름 수정', lbl()[f.d - 1], f.n.n, el);
       if (v) { f.n.n = v; save(); render(); }
     } else remove(f, el);
   };
@@ -167,12 +259,18 @@ function menu(el) {
 async function remove(f, el) {
   const k = Tree.desc(f.n);
   if (k && !await confirmBox(`<b>${esc(f.n.n)}</b> 아래 ${k}개 항목도 같이 지워져요`, '삭제', el, true)) return;
-  const curTab = S.t.c[S.cur];
+  const curTab = S.t.c[S.cur], at = f.p.c.indexOf(f.n), tree = S.t;
   const done = () => {
-    f.p.c.splice(f.p.c.indexOf(f.n), 1);
+    f.p.c.splice(at, 1);
     const i = S.t.c.indexOf(curTab);
     S.cur = Math.max(0, i >= 0 ? i : Math.min(S.cur, S.t.c.length - 1));
     save(); render();
+    snack(`${!memo() && f.d == 4 ? '해결했어요' : '삭제했어요'} · ${esc(f.n.n)}`, () => {
+      if (S.t != tree) return; // switched 설비점검/메모 meanwhile
+      f.p.c.splice(Math.min(at, f.p.c.length), 0, f.n);
+      if (f.d == 1) S.cur = S.t.c.indexOf(f.n);
+      save(); render(); pop($(`[data-id="${f.n.id}"]`));
+    });
   };
   if (f.d == 1) { done(); return; }
   el.style.overflow = 'hidden';
@@ -192,7 +290,7 @@ function more(el) {
       return;
     }
     closePop();
-    if (m.dataset.m == 'b') A.share(Tree.toText(S.t)); else restore(el);
+    if (m.dataset.m == 'b') { const b = both(); A.share(Tree.pack(b.i.t, b.m.t)); } else restore(el);
   };
 }
 function restore(el) {
@@ -200,16 +298,20 @@ function restore(el) {
     <div class="btns"><button class="b2" data-p>붙여넣기</button><button class="b1" data-ok>복원</button></div>`, el, 'modal');
   p.querySelector('[data-p]').onclick = () => { const t = A.paste(); if (t) $('#ta').value = t; };
   p.querySelector('[data-ok]').onclick = () => {
-    const t = Tree.parse($('#ta').value);
-    if (!t.c.length) { toast('내용이 없어요'); return; }
-    closePop(); S = { t, cur: 0 }; ids(S.t); save(); render(); toast('복원했어요');
+    const u = Tree.unpack($('#ta').value);
+    if (!u.t.c.length && !(u.m && u.m.c.length)) { toast('내용이 없어요'); return; }
+    const b = both(), i = { t: u.t, cur: 0 }, m = u.m ? { t: u.m, cur: 0 } : b.m; // old backup: keep current 메모
+    ids(i.t); ids(m.t); stamp(i.t);
+    const [on, off] = memo() ? [m, i] : [i, m];
+    S.t = on.t; S.cur = on.cur; S.x = off;
+    closePop(); save(); render(); toast('복원했어요');
   };
 }
 
 /* ---------- 터치: 톡 · 길게 눌러 메뉴 · 길게 눌러 끌기 ---------- */
 let G = null;
 document.addEventListener('touchstart', e => {
-  if (G || e.touches.length > 1 || $('#pop').className) return;
+  if (G || e.touches.length > 1 || $('#pop').className || e.target.closest('input,textarea')) return;
   const t = e.touches[0], tg = e.target;
   const el = tg.closest('[data-add]') ? null : tg.closest('[data-id]');
   G = { x: t.clientX, y: t.clientY, tg, el, lp: false, moved: false };
@@ -221,6 +323,7 @@ document.addEventListener('touchmove', e => {
   if (!G.lp) { if (Math.abs(dx) + Math.abs(dy) > 10) { clearTimeout(G.timer); G = null; } return; }
   e.preventDefault(); // without this the WebView eats the next tap after a drag
   if (Math.abs(dx) + Math.abs(dy) > 6) G.moved = true;
+  G.fy = t.clientY; G.dx = dx; G.dy = dy;
   dragMove(G, dx, dy);
 }, { passive: false });
 document.addEventListener('touchend', e => {
@@ -238,8 +341,15 @@ function tap(tg) {
   const tog = tg.closest('[data-tog]'); if (tog) return toggle(tog.dataset.tog);
   const tab = tg.closest('.tab'); if (tab) return selTab(tab);
   const is = tg.closest('.iss'); if (is) return copy(is);
+  const nt = tg.closest('.note'); if (nt) return copyNote(nt);
+  const md = tg.closest('[data-mode]'); if (md) return setMode(md.dataset.mode);
+  const bk = tg.closest('[data-bulk]'); if (bk) return bulk(bk);
   const m = tg.closest('#more'); if (m) return more(m);
+  if (tg.closest('[data-search]')) return openSearch();
+  if (tg.closest('#sclose')) return closeSearch();
+  const r = tg.closest('[data-go]'); if (r) return go(+r.dataset.go);
 }
+$('#q').addEventListener('input', e => results(e.target.value));
 function lift(g) {
   const el = g.el, kind = el.classList[0];
   g.sib = [...el.parentNode.children].filter(x => x.dataset.id && x.classList[0] == kind);
@@ -252,6 +362,14 @@ function lift(g) {
   el.classList.add('lift');
   el.style.transition = 'transform .2s ' + EASE; el.style.transform = 'scale(1.03)';
   g.sib.forEach(s => s != el && s.classList.add('mv'));
+  g.sy0 = scrollY; g.fy = g.y; g.dx = g.dy = 0;
+  // finger near the top/bottom edge scrolls the page; the drag keeps following
+  (function edge() {
+    if (G != g) return;
+    const y = g.fy, v = y < 80 ? -(80 - y) / 5 : y > innerHeight - 80 ? (y - innerHeight + 80) / 5 : 0;
+    if (v && g.ax == 'y') { scrollBy(0, v); dragMove(g, g.dx, g.dy); }
+    requestAnimationFrame(edge);
+  })();
 }
 // offset that moves sibling i onto cell j (tabs sit in a grid of equal cells)
 const cell = (g, i, j) => `translate(${g.rects[j].left - g.rects[i].left}px,${g.rects[j].top - g.rects[i].top}px)`;
@@ -269,6 +387,7 @@ function dragMove(g, dx, dy) {
     g.to = to; return;
   }
   const r = g.rects[g.from];
+  dy += scrollY - g.sy0; // rects were measured before any auto-scroll
   // swap once the dragged edge crosses a neighbour's middle
   const lo = r.top + dy, hi = r.bottom + dy;
   g.el.style.transform = `translateY(${dy}px) scale(1.03)`;
@@ -280,7 +399,6 @@ function dragMove(g, dx, dy) {
     s.style.transform = sh ? `translateY(${sh}px)` : '';
   });
   g.to = to;
-  // shortcut: no auto-scroll while dragging near the screen edge; add if lists outgrow one screen
 }
 function unlift(g) {
   g.el.style.transition = 'transform .2s ' + EASE; g.el.style.transform = '';
@@ -305,6 +423,6 @@ function drop(g) {
 }
 
 // Android back: close the top-most window first
-window.back = () => closePop();
+window.back = () => closePop() || closeSearch();
 
 render();

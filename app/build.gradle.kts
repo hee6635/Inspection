@@ -10,8 +10,8 @@ android {
         applicationId = "com.hee.inspection"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.4"
+        versionCode = 6
+        versionName = "1.5"
     }
     // Fixed key so each CI build installs as an update over the last one (CI makes a new debug key every run)
     signingConfigs {

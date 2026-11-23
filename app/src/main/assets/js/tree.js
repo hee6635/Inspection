@@ -25,6 +25,13 @@ const Tree = (() => {
   // number of 문제 under node n sitting at depth d
   const count = (n, d) => d >= MAX ? 1 : n.c.reduce((a, c) => a + count(c, d + 1), 0);
   const desc = n => n.c.reduce((a, c) => a + 1 + desc(c), 0);
-  return { parse, toText, count, desc };
+  // backup = 설비점검 text, a marker line, then 메모 text (old backups have no marker)
+  const SEP = '=== 메모 ===';
+  const pack = (t, m) => toText(t) + '\n' + SEP + '\n' + toText(m);
+  function unpack(text) {
+    const [t, m] = String(text).split(/^[ \t]*===\s*메모\s*===[ \t]*\r?$/m);
+    return { t: parse(t), m: m === undefined ? null : parse(m) };
+  }
+  return { parse, toText, count, desc, pack, unpack };
 })();
 if (typeof module !== 'undefined') module.exports = Tree;

@@ -50,7 +50,8 @@ const shots = process.argv[2];
 
   // long-press drag #1 above #3
   await hold('.iss >> nth=1', 0, -40);
-  assert.deepStrictEqual(await p.$$eval('.iss', e => e.map(x => x.textContent)), ['#1PUMP 미세누유중', '#3PUMP 미세누유중'], 'issue reorder');
+  assert.deepStrictEqual(await p.$$eval('.iss', e => e.map(x => x.firstChild.textContent)), ['#1PUMP 미세누유중', '#3PUMP 미세누유중'], 'issue reorder');
+  assert.strictEqual(await p.textContent('.iss .age'), '오늘', 'issue date shown');
   // each issue copies only itself
   // any 문제 copies every 문제 of its 점검항목, one per line
   await tap('.iss >> nth=1');
@@ -91,6 +92,36 @@ const shots = process.argv[2];
   // resolve (delete) an issue
   await hold('.iss >> nth=0'); await p.click('[data-m="d"]'); await wait(600);
   assert.strictEqual(await p.locator('.iss').count(), 1, 'issue resolved');
+  // undo bar brings it back
+  assert.ok((await p.textContent('#snack')).includes('해결했어요'), 'undo bar');
+  await p.click('#snack b'); await wait(500);
+  assert.strictEqual(await p.locator('.iss').count(), 2, 'undo restores');
+  await hold('.iss >> nth=0'); await p.click('[data-m="d"]'); await wait(600);
+  // an issue older than a week turns red
+  await p.evaluate(() => { find($('.iss').dataset.id).n.a = Date.now() - 9 * 864e5; render(); });
+  assert.strictEqual(await p.textContent('.iss .age.old'), '9일째', 'old issue');
+
+  // 메모: separate tabs, add a note, expand/collapse all, copy without bubble
+  await tap('[data-mode="m"]'); await wait(400);
+  assert.deepStrictEqual(await p.$$eval('.tab', e => e.map(x => x.firstChild.textContent)), ['K1'], 'memo tabs are separate');
+  await tap('.card .row'); await tap('.card [data-add]');
+  await p.fill('#in', 'STS 강종은 냉각 30분'); await p.click('[data-ok]'); await wait(500);
+  await tap('.note'); assert.deepStrictEqual(await p.evaluate(() => window.__copied.at(-1)), ['STS 강종은 냉각 30분', '', '', false], 'note copy');
+  await tap('.addcat'); await p.fill('#in', '주의사항'); await p.click('[data-ok]'); await wait(500);
+  await tap('[data-bulk]'); assert.strictEqual(await p.locator('.card.open').count(), 2, 'open all');
+  assert.strictEqual(await p.textContent('[data-bulk]'), '모두 접기');
+  await tap('[data-bulk]'); assert.strictEqual(await p.locator('.card.open').count(), 0, 'close all');
+  await shot('7-memo');
+
+  // 검색 finds 설비점검 and 메모, tapping a result jumps there
+  await tap('[data-search]'); await p.fill('#q', 'sts'); await wait(200);
+  assert.strictEqual(await p.locator('.res').count(), 1, 'search memo');
+  await shot('8-search');
+  await p.fill('#q', '3PUMP'); await wait(200);
+  await tap('.res'); await wait(500);
+  assert.strictEqual(await p.$eval('[data-mode="i"]', e => e.classList.contains('on')), true, 'jumped to 설비점검');
+  assert.ok(await p.locator('.card.open .iss').first().isVisible(), 'result card opened');
+  await tap('[data-search]'); assert.strictEqual(await p.evaluate(() => back()), true, 'back closes search'); await wait(400);
 
   // 말풍선 toggle in the ⋯ menu: off -> copy only, bubble closed
   await tap('#more'); await p.click('[data-m="f"]'); await wait(300);
@@ -104,16 +135,25 @@ const shots = process.argv[2];
   // backup then restore round trip
   await tap('#more'); await p.click('[data-m="b"]'); await wait(300);
   const backup = await p.evaluate(() => window.__shared);
-  assert.strictEqual(backup, await saved(), 'backup = saved tree');
+  assert.ok(backup.startsWith(await saved() + '\n=== 메모 ===\nK1\n  작업방법\n    STS'), 'backup has both');
   await tap('#more'); await p.click('[data-m="r"]'); await wait(400);
   await p.fill('#ta', 'A\n  B\n    C\n      D'); await p.click('[data-ok]'); await wait(500);
   assert.strictEqual(await saved(), 'A\n  B\n    C\n      D', 'restore');
+  assert.ok(await p.evaluate(() => Tree.toText(S.x.t).includes('STS')), 'old-style backup keeps 메모');
   await p.reload(); await wait(300);
   assert.strictEqual(await p.$eval('.tab.on', e => e.firstChild.textContent), 'A', 'data survives reload');
   // Android back closes windows first
   await tap('#more'); assert.strictEqual(await p.evaluate(() => back()), true); await wait(300);
   assert.strictEqual(await p.evaluate(() => back()), false);
 
+  // drag near the bottom edge scrolls the page and the drop lands further down
+  await p.evaluate(() => { S.t.c[S.cur].c = Array.from({ length: 16 }, (_, i) => ({ n: 'C' + i, c: [], id: 1e6 + i })); render(); scrollTo(0, 0); });
+  { const [x, y] = await ctr('.card >> nth=0'); await touch('touchStart', x, y); await wait(600);
+    for (let k = 1; k <= 10; k++) { await touch('touchMove', x, y + (740 - y) * k / 10); await wait(16); }
+    await wait(1500); await touch('touchEnd'); await wait(500); }
+  assert.ok(await p.evaluate(() => scrollY) > 200, 'page auto-scrolled');
+  const order = await p.$$eval('.card .nm', e => e.map(x => x.textContent));
+  assert.ok(order.indexOf('C0') > 10, 'dropped far down: ' + order.indexOf('C0'));
   await p.emulateMedia({ colorScheme: 'dark' }); await tap('.card .row'); await shot('4-dark');
   assert.deepStrictEqual(errs, [], 'no page errors');
   console.log('ui tests ok');

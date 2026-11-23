@@ -23,7 +23,10 @@ button { font-family: inherit; transition: transform .15s; }
 button:active { transform: scale(.96); }
 
 header { display: flex; align-items: center; gap: 6px; padding: 24px 20px 12px; }
-h1 { flex: 1; font-size: 24px; margin: 0; }
+/* 설비점검 ↔ 메모: the active title is big, the other small and grey */
+.mode { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 12px; }
+.mode b { white-space: nowrap; font-size: 18px; font-weight: 700; color: var(--mute); transition: font-size .3s var(--ease), color .3s; }
+.mode b.on { font-size: 24px; color: var(--tx); }
 #more { background: none; border: 0; font-size: 22px; color: var(--sub); padding: 4px 8px; }
 
 /* 큰 탭 */
@@ -72,11 +75,20 @@ h1 { flex: 1; font-size: 24px; margin: 0; }
   margin: 4px 16px 4px 64px; padding: 10px 12px; border-radius: 12px; background: var(--redbg);
   color: var(--red); font-size: 15px; font-weight: 700; display: flex; gap: 8px; align-items: center;
 }
+.age { margin-left: auto; font-size: 11.5px; font-weight: 600; color: #e0707d; white-space: nowrap; }
+.age.old { color: #fff; background: var(--red); border-radius: 999px; padding: 1px 7px; }
 .iss::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--red); flex: none; }
 .add { margin: 2px 16px 2px 64px; padding: 8px 0; font-size: 14px; color: var(--blue); display: flex; align-items: center; gap: 6px; }
 .add i, .addcat i { width: 18px; height: 18px; border: 1.5px solid currentColor; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 13px; line-height: 1; }
 .add.sub { color: var(--sub); }
 .gap { height: 10px; }
+.card.m .ico { background: #eef4ff; }
+.card.m .ico svg { stroke: var(--blue); }
+.note { margin: 4px 14px; padding: 10px 12px; border-radius: 12px; background: var(--fill); font-size: 15px; line-height: 1.45; display: flex; gap: 8px; align-items: baseline; word-break: keep-all; overflow-wrap: anywhere; }
+.note::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--mute); flex: none; transform: translateY(-2px); }
+.card.m .add { margin-left: 16px; }
+.bulk { display: flex; justify-content: flex-end; margin: -4px 4px 8px; }
+.bulk b { font-size: 13px; font-weight: 600; color: var(--blue); padding: 4px 8px; }
 .addcat { display: flex; align-items: center; gap: 8px; justify-content: center; color: var(--blue); font-size: 15px; padding: 14px; border: 1.5px dashed var(--seg); border-radius: 20px; }
 .empty { text-align: center; color: var(--sub); padding: 60px 0; }
 
@@ -129,3 +141,36 @@ textarea:focus { border-color: var(--blue); }
 }
 #toast.on { transform: none; opacity: 1; }
 #toast b { color: #ff8f9c; }
+
+/* 되돌리기 */
+#snack {
+  position: fixed; left: 14px; right: 14px; bottom: 20px; z-index: 30; background: #333d4b; color: #fff;
+  border-radius: 16px; padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 10px; overflow: hidden;
+  transform: translateY(140%); transition: transform .35s var(--ease);
+}
+#snack.on { transform: none; }
+#snack span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#snack b { color: #6ea8fe; font-weight: 700; padding: 2px 4px; }
+#snack i { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: #6ea8fe; transform-origin: left; }
+#snack.on i { animation: snackbar 4s linear forwards; }
+@keyframes snackbar { to { transform: scaleX(0); } }
+
+/* 검색 */
+.srch { flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--seg); display: grid; place-items: center; }
+.srch svg { width: 18px; height: 18px; stroke: var(--sub); fill: none; stroke-width: 2.2; stroke-linecap: round; }
+#search {
+  position: fixed; inset: 0; z-index: 15; background: var(--bg); padding-top: 20px; overflow-y: auto;
+  transform: translateX(100%); visibility: hidden; transition: transform .35s var(--ease), visibility 0s .35s;
+}
+#search.on { transform: none; visibility: visible; transition: transform .35s var(--ease); }
+.sbox { margin: 0 16px 12px; background: var(--card); border: 1.5px solid var(--blue); border-radius: 14px; padding: 0 6px 0 14px; display: flex; align-items: center; }
+.sbox input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--tx); font-size: 16px; padding: 13px 0; }
+#sclose { color: var(--sub); padding: 10px; font-size: 16px; }
+.res { margin: 0 16px 8px; background: var(--card); border-radius: 16px; padding: 12px 14px; }
+.res .p { font-size: 12px; color: var(--sub); margin-bottom: 4px; }
+.res .t { font-size: 15px; font-weight: 600; word-break: keep-all; overflow-wrap: anywhere; }
+.res mark { background: #fff1a8; color: #191f28; border-radius: 3px; padding: 0 1px; }
+.res .k { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 1px 6px; margin-right: 6px; }
+.ki { background: var(--redbg); color: var(--red); }
+.km { background: #eef4ff; color: var(--blue); }
+.kn { background: var(--fill); color: var(--sub); }
