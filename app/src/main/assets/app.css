@@ -28,12 +28,11 @@ h1 { font-size: 24px; margin: 0; }
 
 /* 큰 탭 */
 #tabs {
-  position: relative; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none;
-  margin: 0 16px 14px; padding: 3px; background: var(--seg); border-radius: 999px;
+  position: relative; display: flex; flex-wrap: wrap; gap: 2px;
+  margin: 0 16px 14px; padding: 3px; background: var(--seg); border-radius: 22px;
 }
-#tabs::-webkit-scrollbar { display: none; }
 #thumb {
-  position: absolute; top: 3px; bottom: 3px; left: 0; border-radius: 999px;
+  position: absolute; top: 0; left: 0; border-radius: 999px;
   background: var(--card); border: 1.5px solid var(--blue);
   transition: transform .38s var(--ease), width .38s var(--ease);
 }

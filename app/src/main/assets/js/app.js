@@ -39,9 +39,8 @@ function thumb(anim) {
   const on = $('.tab.on'), th = $('#thumb');
   if (!on) { th.style.display = 'none'; return; }
   th.style.transition = anim ? '' : 'none';
-  th.style.width = on.offsetWidth + 'px';
-  th.style.transform = `translateX(${on.offsetLeft}px)`;
-  if (anim) on.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' });
+  th.style.width = on.offsetWidth + 'px'; th.style.height = on.offsetHeight + 'px';
+  th.style.transform = `translate(${on.offsetLeft}px,${on.offsetTop}px)`; // tabs wrap onto several rows
 }
 function renderList() {
   const tab = S.t.c[S.cur];

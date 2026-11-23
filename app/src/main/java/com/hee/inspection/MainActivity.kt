@@ -6,10 +6,13 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.webkit.JavascriptInterface
+import android.view.WindowInsets
 import android.webkit.WebView
+import android.widget.FrameLayout
 
 class MainActivity : Activity() {
     private lateinit var web: WebView
@@ -22,7 +25,16 @@ class MainActivity : Activity() {
         web.setBackgroundColor(0) // let the theme background show while the page loads
         web.addJavascriptInterface(Bridge(), "Android")
         web.loadUrl("file:///android_asset/index.html")
-        setContentView(web)
+        val root = FrameLayout(this).apply { addView(web) } // WebView ignores its own padding
+        setContentView(root)
+        if (Build.VERSION.SDK_INT >= 35) {
+            // Android 15 draws apps under the status/navigation bars; keep the page clear of them
+            root.setOnApplyWindowInsetsListener { v, ins ->
+                val b = ins.getInsets(WindowInsets.Type.systemBars())
+                v.setPadding(b.left, b.top, b.right, b.bottom)
+                ins
+            }
+        }
     }
 
     @Deprecated("Deprecated in Java")
