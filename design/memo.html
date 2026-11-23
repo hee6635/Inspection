@@ -1,0 +1,27 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../app/src/main/assets/app.css"><style>
+body{display:flex;gap:24px;padding:20px;background:#e9ecef;font-family:"Noto Sans CJK KR",sans-serif}
+.ph{width:340px;height:640px;background:var(--bg);border:9px solid #191f28;border-radius:32px;overflow:hidden;position:relative}
+.c{font-weight:700;font-size:15px;margin-bottom:8px;text-align:center}
+.mode{flex:1;display:flex;gap:14px;align-items:baseline}
+.mode b{font-size:24px;color:var(--tx)}.mode span{font-size:18px;font-weight:700;color:var(--mute)}
+#tabs .tab:first-child{background:var(--card);color:var(--tx);outline:1.5px solid var(--blue)}
+.note{margin:4px 16px 4px 64px;padding:10px 12px;border-radius:12px;background:var(--fill);color:var(--tx);font-size:15px;display:flex;gap:8px;align-items:center}
+.note:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--mute);flex:none}
+.mico{background:#eef4ff!important}.mico svg{stroke:var(--blue)!important}
+</style></head><body>
+<div><div class="c">① 지금 화면 (설비점검)</div><div class="ph">
+<header><div class="mode"><b>설비점검</b><span>메모</span></div><b class="plus">⊕</b><button id="more">⋯</button></header>
+<nav id="tabs"><b class="tab">K1<i class="tb">2</i></b><b class="tab">K1야간</b><b class="tab">K2</b></nav>
+<main id="list"><div class="card hot"><div class="row"><div class="ico"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L4 16.8V20h3.2l5.3-5.3a4 4 0 0 0 5.2-5.4l-2.5 2.5-2.3-.6-.6-2.3z"/></svg></div><div class="nm">정정 유압</div><div class="badge">2</div><div class="chev">⌄</div></div></div>
+<div class="card"><div class="row"><div class="ico"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L4 16.8V20h3.2l5.3-5.3a4 4 0 0 0 5.2-5.4l-2.5 2.5-2.3-.6-.6-2.3z"/></svg></div><div class="nm">Grinder 유압</div><div class="chev">⌄</div></div></div></main>
+</div></div>
+<div><div class="c">② "메모" 누르면 → 같은 구성</div><div class="ph">
+<header><div class="mode"><span>설비점검</span><b>메모</b></div><b class="plus">⊕</b><button id="more">⋯</button></header>
+<nav id="tabs"><b class="tab">공통</b><b class="tab">K1</b><b class="tab">K2</b></nav>
+<main id="list"><div class="card open"><div class="row"><div class="ico mico"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z M9 10h6 M9 14h6 M9 18h4"/></svg></div><div class="nm">태그 위치</div><div class="chev">⌄</div></div>
+<div class="body"><div><div class="chk">정정 유압 · Grinder 유압</div><div class="note">K1 작업진행실 벽체</div><div class="add"><i>+</i>메모 추가</div>
+<div class="chk">보열로 1·2기</div><div class="note">집진기 벽체쪽 번주</div><div class="add"><i>+</i>메모 추가</div><div class="add sub"><i>+</i>항목 추가</div><div class="gap"></div></div></div></div>
+<div class="card"><div class="row"><div class="ico mico"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z M9 10h6 M9 14h6 M9 18h4"/></svg></div><div class="nm">연락처</div><div class="chev">⌄</div></div></div>
+<div class="card"><div class="row"><div class="ico mico"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z M9 10h6 M9 14h6 M9 18h4"/></svg></div><div class="nm">주의사항</div><div class="chev">⌄</div></div></div>
+<div class="addcat"><i>+</i>메모 묶음 추가</div></main>
+</div></div></body></html>
