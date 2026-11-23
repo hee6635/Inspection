@@ -14,7 +14,7 @@ const shots = process.argv[2];
     window.__copied = []; window.__shared = '';
     window.Android = {
       load: () => localStorage.getItem('d') || '', save: s => localStorage.setItem('d', s),
-      copy: (t, a, c) => window.__copied.push([t, a, c]), canFloat: () => true, askFloat: () => {},
+      copy: (t, a, c, f) => window.__copied.push([t, a, c, f]), canFloat: () => true, askFloat: () => {}, hideFloat: () => { window.__hidden = 1; },
       share: t => { window.__shared = t; }, paste: () => '',
     };
   });
@@ -37,7 +37,7 @@ const shots = process.argv[2];
   await tap('.card .row');
   assert.ok(await p.locator('.card.open').count() == 1, 'card opens');
   await tap('.iss');
-  assert.deepStrictEqual(await p.evaluate(() => window.__copied[0]), ['#3PUMP 미세누유중', '정정 유압', '정정 유압 Pump 작동 상태 점검']);
+  assert.deepStrictEqual(await p.evaluate(() => window.__copied[0]), ['#3PUMP 미세누유중', '정정 유압', '정정 유압 Pump 작동 상태 점검', true]);
   assert.ok((await p.textContent('#toast')).includes('#3PUMP'), 'toast');
 
   // add a second issue through the input window
@@ -84,6 +84,15 @@ const shots = process.argv[2];
   // resolve (delete) an issue
   await hold('.iss >> nth=0'); await p.click('[data-m="d"]'); await wait(600);
   assert.strictEqual(await p.locator('.iss').count(), 1, 'issue resolved');
+
+  // 말풍선 toggle in the ⋯ menu: off -> copy only, bubble closed
+  await tap('#more'); await p.click('[data-m="f"]'); await wait(300);
+  assert.ok(await p.locator('#pop.menu .sw:not(.on)').isVisible(), 'switch off, menu stays open');
+  assert.strictEqual(await p.evaluate(() => window.__hidden), 1, 'bubble closed');
+  await p.evaluate(() => back()); await wait(300);
+  await tap('.iss'); assert.strictEqual(await p.evaluate(() => window.__copied.at(-1)[3]), false, 'copy without bubble');
+  await tap('#more'); await p.click('[data-m="f"]'); await wait(300); await shot('5-toggle'); await p.evaluate(() => back()); await wait(300);
+  await tap('.iss'); assert.strictEqual(await p.evaluate(() => window.__copied.at(-1)[3]), true, 'bubble back on');
 
   // backup then restore round trip
   await tap('#more'); await p.click('[data-m="b"]'); await wait(300);

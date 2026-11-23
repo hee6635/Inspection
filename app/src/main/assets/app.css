@@ -91,10 +91,18 @@ h1 { font-size: 24px; margin: 0; }
 #dim.clear { background: transparent; }
 #pop { position: fixed; z-index: 21; display: none; background: var(--card); box-shadow: var(--sh); }
 #pop.modal { display: block; left: 20px; right: 20px; top: 18%; padding: 22px 20px 16px; border-radius: 22px; }
-#pop.menu { display: block; width: 180px; overflow: hidden; border-radius: 16px; }
+#pop.menu { display: block; width: 200px; overflow: hidden; border-radius: 16px; }
 #pop.menu > div { padding: 15px 18px; font-size: 15px; border-bottom: 1px solid var(--line); }
 #pop.menu > div:last-child { border-bottom: 0; }
 .red { color: var(--red); }
+.mrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+/* 물방울 스위치: knob stretches while it slides, squishes at the end */
+.sw { position: relative; flex: none; width: 44px; height: 26px; border-radius: 999px; background: var(--seg); transition: background .3s; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 999px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); animation: swOff .34s var(--ease) both; }
+.sw.on { background: var(--blue); }
+.sw.on::after { animation-name: swOn; }
+@keyframes swOn { 0% { transform: none; width: 20px; } 45% { width: 28px; } 85% { transform: translateX(18px); width: 20px; } 92% { transform: translateX(18px) scaleX(.9); } 100% { transform: translateX(18px); width: 20px; } }
+@keyframes swOff { 0% { transform: translateX(18px); width: 20px; } 45% { transform: translateX(10px); width: 28px; } 85% { transform: none; width: 20px; } 92% { transform: scaleX(.9); } 100% { transform: none; width: 20px; } }
 .mt { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
 .msg { font-size: 15px; line-height: 1.5; margin: -4px 0 4px; }
 .fl { position: relative; display: block; }

@@ -47,13 +47,17 @@ class MainActivity : Activity() {
 
         @JavascriptInterface fun save(s: String) { prefs.edit().putString("tree", s).apply() }
 
-        @JavascriptInterface fun copy(text: String, cat: String, item: String) {
+        @JavascriptInterface fun copy(text: String, cat: String, item: String, float: Boolean) {
             clipboard().setPrimaryClip(ClipData.newPlainText("점검", text))
-            if (!canFloat()) return
+            if (!float || !canFloat()) return
             startForegroundService(
                 Intent(this@MainActivity, FloatService::class.java)
                     .putExtra("t", text).putExtra("l1", cat).putExtra("l2", item)
             )
+        }
+
+        @JavascriptInterface fun hideFloat() {
+            startService(Intent(this@MainActivity, FloatService::class.java).setAction("close"))
         }
 
         @JavascriptInterface fun canFloat(): Boolean = Settings.canDrawOverlays(this@MainActivity)

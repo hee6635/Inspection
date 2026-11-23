@@ -5,7 +5,7 @@ const $$ = s => [...document.querySelectorAll(s)];
 const A = window.Android || {
   load: () => localStorage.getItem('d') || '', save: s => localStorage.setItem('d', s),
   copy: t => navigator.clipboard && navigator.clipboard.writeText(t).catch(() => {}),
-  canFloat: () => true, askFloat: () => {}, share: t => console.log(t), paste: () => '',
+  canFloat: () => true, askFloat: () => {}, hideFloat: () => {}, share: t => console.log(t), paste: () => '',
 };
 const EASE = 'cubic-bezier(.2,.9,.25,1)';
 const LABEL = ['큰 탭', '소분류', '점검항목', '문제 내용'];
@@ -131,9 +131,10 @@ let askedFloat = false;
 function copy(el) {
   const f = find(el.dataset.id), item = f.p, cat = find(item.id).p;
   el.animate([{ transform: 'scale(.96)' }, { transform: 'none' }], { duration: 220, easing: EASE });
-  A.copy(f.n.n, cat.n, item.n);
+  const fl = S.float !== false; // 말풍선 on by default
+  A.copy(f.n.n, cat.n, item.n, fl);
   toast('복사됨 · <b>' + esc(f.n.n) + '</b>');
-  if (!askedFloat && !A.canFloat()) {
+  if (fl && !askedFloat && !A.canFloat()) {
     askedFloat = true;
     setTimeout(() => confirmBox('말풍선을 다른 앱 위에 띄우려면<br><b>다른 앱 위에 표시</b>를 허용해 주세요', '허용하기', el)
       .then(ok => ok && A.askFloat()), 500);
@@ -179,9 +180,16 @@ async function remove(f, el) {
   { duration: 300, easing: EASE }).onfinish = done;
 }
 function more(el) {
-  const p = openPop('<div data-m="b">백업 내보내기</div><div data-m="r">복원 (붙여넣기)</div>', el, 'menu');
+  const p = openPop(`<div data-m="f" class="mrow">말풍선 띄우기<i class="sw${S.float !== false ? ' on' : ''}"></i></div>
+    <div data-m="b">백업 내보내기</div><div data-m="r">복원 (붙여넣기)</div>`, el, 'menu');
   p.onclick = e => {
     const m = e.target.closest('[data-m]'); if (!m) return;
+    if (m.dataset.m == 'f') { // toggle in place, keep the menu open
+      S.float = S.float === false; save();
+      m.querySelector('.sw').classList.toggle('on', S.float);
+      if (!S.float) A.hideFloat();
+      return;
+    }
     closePop();
     if (m.dataset.m == 'b') A.share(Tree.toText(S.t)); else restore(el);
   };
