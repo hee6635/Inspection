@@ -122,16 +122,18 @@ function closePop() {
 }
 $('#dim').onclick = closePop;
 
-function ask(head, label, val, from) {
+// multi: a textarea where Enter makes a new line (메모); otherwise Enter saves
+function ask(head, label, val, from, multi) {
   return new Promise(res => {
-    const p = openPop(`<div class="mt">${head}</div><label class="fl"><input id="in" value="${esc(val)}" placeholder=" " autocomplete="off"><span>${label}</span></label>
+    const box = multi ? `<textarea id="in" placeholder=" ">${esc(val)}</textarea>` : `<input id="in" value="${esc(val)}" placeholder=" " autocomplete="off">`;
+    const p = openPop(`<div class="mt">${head}</div><label class="fl${multi ? ' ml' : ''}">${box}<span>${label}</span></label>
       <div class="btns"><button class="b2" data-x>취소</button><button class="b1" data-ok>저장</button></div>`, from, 'modal');
     popClose = res;
     const inp = $('#in'); inp.focus();
     const done = v => { popClose = null; closePop(); res(v); };
     p.querySelector('[data-x]').onclick = () => done(null);
     p.querySelector('[data-ok]').onclick = () => { const v = inp.value.trim(); if (v) done(v); else inp.focus(); };
-    inp.onkeydown = e => { if (e.key == 'Enter') p.querySelector('[data-ok]').click(); };
+    if (!multi) inp.onkeydown = e => { if (e.key == 'Enter') p.querySelector('[data-ok]').click(); };
   });
 }
 function confirmBox(msg, ok, from, danger) {
@@ -235,7 +237,7 @@ function copy(el) {
 async function add(pid, el) {
   const f = pid == 'root' ? { n: S.t, d: 0 } : find(pid);
   const L = lbl()[f.d];
-  const v = await ask(L + ' 추가', L, '', el); if (!v) return;
+  const v = await ask(L + ' 추가', L, '', el, memo() && f.d == 2); if (!v) return;
   const n = { n: v, c: [], id: ++seq };
   if (!memo() && f.d == 3) n.a = Date.now();
   f.n.c.push(n);
@@ -246,12 +248,13 @@ async function add(pid, el) {
 }
 function menu(el) {
   const f = find(el.dataset.id);
-  const p = openPop(`<div data-m="e">이름 수정</div><div data-m="d" class="red">${f.d == 4 ? '해결 (삭제)' : '삭제'}</div>`, el, 'menu');
+  const leaf = f.d == (memo() ? 3 : 4); // 메모 줄 · 문제 hold 내용, not a 이름
+  const p = openPop(`<div data-m="e">${leaf ? '내용 수정' : '이름 수정'}</div><div data-m="d" class="red">${f.d == 4 ? '해결 (삭제)' : '삭제'}</div>`, el, 'menu');
   p.onclick = async e => {
     const m = e.target.closest('[data-m]'); if (!m) return;
     closePop();
     if (m.dataset.m == 'e') {
-      const v = await ask('이름 수정', lbl()[f.d - 1], f.n.n, el);
+      const v = await ask(leaf ? '내용 수정' : '이름 수정', lbl()[f.d - 1], f.n.n, el, memo() && leaf);
       if (v) { f.n.n = v; save(); render(); }
     } else remove(f, el);
   };

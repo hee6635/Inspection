@@ -19,4 +19,8 @@ assert.strictEqual(T.toText(up.t), 'K1\n  정정 유압');
 assert.strictEqual(T.toText(up.m), 'K1\n  작업방법\n    A강종은 이렇게');
 assert.strictEqual(T.unpack('K1\n  B').m, null);
 assert.strictEqual(T.unpack('K1\r\n===메모===\r\nM').m.c[0].n, 'M');
+// a multi-line 메모 survives the one-line-per-item backup
+const ml = T.parse('K1\n  작업방법\n    첫줄\\n둘째줄');
+assert.strictEqual(ml.c[0].c[0].c[0].n, '첫줄\n둘째줄');
+assert.strictEqual(T.toText(ml), 'K1\n  작업방법\n    첫줄\\n둘째줄');
 console.log('tree tests ok');

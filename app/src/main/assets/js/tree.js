@@ -6,7 +6,7 @@ const Tree = (() => {
     const root = { n: '', c: [] };
     const st = [root]; // st[d] = last node at depth d
     for (const raw of String(text).split(/\r?\n/)) {
-      const name = raw.trim();
+      const name = raw.trim().replace(/\\n/g, '\n'); // multi-line 메모 is stored as a literal \n
       if (!name) continue;
       const ind = raw.match(/^[ \t　]*/)[0].replace(/[\t　]/g, '  ').length;
       const d = Math.min(Math.floor(ind / 2) + 1, st.length, MAX);
@@ -19,7 +19,7 @@ const Tree = (() => {
   }
   function toText(root) {
     const out = [];
-    (function w(n, d) { for (const c of n.c) { out.push('  '.repeat(d) + c.n); w(c, d + 1); } })(root, 0);
+    (function w(n, d) { for (const c of n.c) { out.push('  '.repeat(d) + c.n.replace(/\n/g, '\\n')); w(c, d + 1); } })(root, 0);
     return out.join('\n');
   }
   // number of 문제 under node n sitting at depth d
